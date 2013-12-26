@@ -96,7 +96,7 @@ require([
 			taxi.transformComponent.transform.translation.x = newX;
 			taxi.transformComponent.setUpdated();
 		});
-		
+
 		// var zombie = loader.getCachedObjectForRef('zombie/zombie_idle01/entities/RootNode.entity');
 		// console.log('Zombie:', zombie);
 
