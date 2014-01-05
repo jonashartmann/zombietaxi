@@ -1,5 +1,6 @@
 require([
 	'goo/entities/GooRunner',
+	'goo/entities/EntityUtils',
 	'goo/statemachine/FSMSystem',
 	'goo/addons/howler/systems/HowlerSystem',
 	'goo/loaders/DynamicLoader',
@@ -9,6 +10,7 @@ require([
 	'js/io/Input'
 ], function (
 	GooRunner,
+	EntityUtils,
 	FSMSystem,
 	HowlerSystem,
 	DynamicLoader,
@@ -85,26 +87,68 @@ require([
 	// This code will be called when the project has finished loading.
 	function onDataLoaded(configs) {
 		var taxi = this.getCachedObjectForRef('car/entities/RootNode.entity');
-		console.log(taxi);
 		Game.register('swipeleft', taxi, function moveLeft () {
 			var newX = taxi.transformComponent.transform.translation.x - 2;
+			if (newX < -3) {
+				return;
+			}
 			taxi.transformComponent.transform.translation.x = newX;
 			taxi.transformComponent.setUpdated();
 		});
 		Game.register('swiperight', taxi, function moveRight () {
 			var newX = taxi.transformComponent.transform.translation.x + 2;
+			if (newX > 3) {
+				return;
+			}
 			taxi.transformComponent.transform.translation.x = newX;
 			taxi.transformComponent.setUpdated();
 		});
 
-		// var zombie = loader.getCachedObjectForRef('zombie/zombie_idle01/entities/RootNode.entity');
-		// console.log('Zombie:', zombie);
+		// Fake the car movement by displacing the road
+		var road = this.getCachedObjectForRef('entities/Quad.entity');
+		var speed = 5;
+		var MAX_CHANGE = 15;
+		var changed = 0;
+		road.setComponent(new ScriptComponent({
+			run: function fakeRoadMovement (_entity) {
+				var frameChange = speed * _entity._world.tpf;
+				changed += frameChange;
+				// fake road displacement by resetting it back and translating again
+				if (changed >= MAX_CHANGE) {
+					frameChange = -MAX_CHANGE;
+					changed = 0;
+				}
 
-		// zombie.setComponent(new ScriptComponent({
-		// 	run: function (_entity) {
-		// 		window.G_test = _entity.animationComponent;
-		// 	}
-		// }));
+				_entity.transformComponent.transform.translation.z += frameChange;
+				_entity.transformComponent.setUpdated();
+			}
+		}));
+
+		var zombie = this.getCachedObjectForRef('zombie/zombie_idle01/entities/RootNode.entity');
+		var zombie2 = EntityUtils.clone(Game.goo.world, zombie);
+		var walkState = zombie.animationComponent.getStates()[4];
+		var runState = zombie.animationComponent.getStates()[3];
+
+		var zSpeed = 5;
+		zombie.setComponent(new ScriptComponent({
+			run: function runZombieRun(_entity) {
+				_entity.transformComponent.transform.translation.z += zSpeed * _entity._world.tpf;
+				_entity.transformComponent.setUpdated();
+			}
+		}));
+
+		zombie2.animationComponent.transitionTo(runState);
+		zombie2.transformComponent.transform.translation.x += 2;
+		var zSpeed2 = 10;
+		zombie2.setComponent(new ScriptComponent({
+			run: function runZombieRun(_entity) {
+				_entity.transformComponent.transform.translation.z += zSpeed2 * _entity._world.tpf;
+				_entity.transformComponent.setUpdated();
+			}
+		}));
+		zombie2.addToWorld();
+
+		// TODO: Add collision
 
 		goo.renderer.domElement.id = 'goo';
 		document.body.appendChild(goo.renderer.domElement);
