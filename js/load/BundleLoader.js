@@ -22,7 +22,8 @@ function (DynamicLoader) {
 			.then(onDataLoaded)
 			.then(null, function onDataLoadFailed(e) {
 				// If something goes wrong, 'e' is the error message from the engine.
-				alert(e);
+				console.log('Failed to load scene:');
+				console.log(e.stack);
 			});
 		},
 		getLoadedObjectByRef: function getLoadedObjectByRef (ref) {

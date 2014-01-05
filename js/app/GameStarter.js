@@ -9,7 +9,8 @@ require([
 	'js/io/Input',
 	'js/load/BundleLoader',
 	'js/game/Spawner',
-	'js/game/Scene'
+	'js/game/Scene',
+	'js/system/CollisionSystem'
 ], function (
 	GooRunner,
 	EntityUtils,
@@ -21,7 +22,8 @@ require([
 	Input,
 	BundleLoader,
 	Spawner,
-	Scene
+	Scene,
+	CollisionSystem
 ) {
 	'use strict';
 	var goo;
@@ -68,6 +70,7 @@ require([
 			});
 			// goo.world.setSystem(new FSMSystem(goo));
 			goo.world.setSystem(new HowlerSystem());
+			goo.world.setSystem(new CollisionSystem());
 			BundleLoader.init(goo, progressCallback);
 			BundleLoader.loadInitialData(onDataLoaded);
 		}

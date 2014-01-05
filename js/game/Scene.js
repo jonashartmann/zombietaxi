@@ -2,9 +2,10 @@ define([
 	'js/app/Game',
 	'js/load/BundleLoader',
 	'js/game/Spawner',
-	'goo/entities/components/ScriptComponent'
+	'goo/entities/components/ScriptComponent',
+	'js/component/CollisionComponent'
 ],
-function (Game, BundleLoader, Spawner, ScriptComponent) {
+function (Game, BundleLoader, Spawner, ScriptComponent, CollisionComponent) {
 	'use strict';
 
 	var Scene = {
@@ -35,6 +36,12 @@ function (Game, BundleLoader, Spawner, ScriptComponent) {
 			taxi.transformComponent.transform.translation.x = newX;
 			taxi.transformComponent.setUpdated();
 		});
+
+		taxi.setComponent(new CollisionComponent({
+			// run: function (_entity) {
+			// 	console.log('Running CollisionComponent');
+			// }
+		}));
 	}
 
 	function setupRoad () {
