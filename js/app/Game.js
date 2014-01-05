@@ -4,8 +4,10 @@ define([
 	"use strict";
 	var _self = {};
 
-    _self.init = function(goo){
+    _self.init = function(goo, camera){
         _self.goo = goo;
+        _self.camera = camera;
+        _self.paused = true;
     };
 
     _self._listeners = {};

@@ -3,21 +3,25 @@ require([
 	'goo/entities/EntityUtils',
 	'goo/statemachine/FSMSystem',
 	'goo/addons/howler/systems/HowlerSystem',
-	'goo/loaders/DynamicLoader',
 	'goo/math/Vector3',
 	'goo/entities/components/ScriptComponent',
 	'js/app/Game',
-	'js/io/Input'
+	'js/io/Input',
+	'js/load/BundleLoader',
+	'js/game/Spawner',
+	'js/game/Scene'
 ], function (
 	GooRunner,
 	EntityUtils,
 	FSMSystem,
 	HowlerSystem,
-	DynamicLoader,
 	Vector3,
 	ScriptComponent,
 	Game,
-	Input
+	Input,
+	BundleLoader,
+	Spawner,
+	Scene
 ) {
 	'use strict';
 	var goo;
@@ -62,98 +66,35 @@ require([
 				antialias: true,
 				manuallyStartGameLoop: true
 			});
-			goo.world.setSystem(new FSMSystem(goo));
+			// goo.world.setSystem(new FSMSystem(goo));
 			goo.world.setSystem(new HowlerSystem());
-			Game.init(goo);
-			Input.init(goo);
-
-			// The loader takes care of loading the data
-			var loader = new DynamicLoader({
-				world: goo.world,
-				rootPath: 'res',
-				progressCallback: progressCallback});
-
-			loader.loadFromBundle('project.project', 'root.bundle',
-				{recursive: false, preloadBinaries: true})
-			.then(onDataLoaded.bind(loader))
-			.then(null, function onDataLoadFailed(e) {
-				// If something goes wrong, 'e' is the error message from the engine.
-				alert(e);
-			});
-
+			BundleLoader.init(goo, progressCallback);
+			BundleLoader.loadInitialData(onDataLoaded);
 		}
 	}
 
 	// This code will be called when the project has finished loading.
 	function onDataLoaded(configs) {
-		var taxi = this.getCachedObjectForRef('car/entities/RootNode.entity');
-		Game.register('swipeleft', taxi, function moveLeft () {
-			var newX = taxi.transformComponent.transform.translation.x - 2;
-			if (newX < -3) {
-				return;
+		var cam = BundleLoader.getLoadedObjectByRef('entities/Camera.entity');
+		Game.init(goo, cam);
+		Input.init(goo);
+		Scene.init();
+
+		Game.register('keypress:p', goo, function changeGameState () {
+			if (Game.paused) {
+				goo.startGameLoop();
+			} else {
+				goo.stopGameLoop();
 			}
-			taxi.transformComponent.transform.translation.x = newX;
-			taxi.transformComponent.setUpdated();
+
+			Game.paused = !Game.paused;
 		});
-		Game.register('swiperight', taxi, function moveRight () {
-			var newX = taxi.transformComponent.transform.translation.x + 2;
-			if (newX > 3) {
-				return;
-			}
-			taxi.transformComponent.transform.translation.x = newX;
-			taxi.transformComponent.setUpdated();
-		});
-
-		// Fake the car movement by displacing the road
-		var road = this.getCachedObjectForRef('entities/Quad.entity');
-		var speed = 5;
-		var MAX_CHANGE = 15;
-		var changed = 0;
-		road.setComponent(new ScriptComponent({
-			run: function fakeRoadMovement (_entity) {
-				var frameChange = speed * _entity._world.tpf;
-				changed += frameChange;
-				// fake road displacement by resetting it back and translating again
-				if (changed >= MAX_CHANGE) {
-					frameChange = -MAX_CHANGE;
-					changed = 0;
-				}
-
-				_entity.transformComponent.transform.translation.z += frameChange;
-				_entity.transformComponent.setUpdated();
-			}
-		}));
-
-		var zombie = this.getCachedObjectForRef('zombie/zombie_idle01/entities/RootNode.entity');
-		var zombie2 = EntityUtils.clone(Game.goo.world, zombie);
-		var walkState = zombie.animationComponent.getStates()[4];
-		var runState = zombie.animationComponent.getStates()[3];
-
-		var zSpeed = 5;
-		zombie.setComponent(new ScriptComponent({
-			run: function runZombieRun(_entity) {
-				_entity.transformComponent.transform.translation.z += zSpeed * _entity._world.tpf;
-				_entity.transformComponent.setUpdated();
-			}
-		}));
-
-		zombie2.animationComponent.transitionTo(runState);
-		zombie2.transformComponent.transform.translation.x += 2;
-		var zSpeed2 = 10;
-		zombie2.setComponent(new ScriptComponent({
-			run: function runZombieRun(_entity) {
-				_entity.transformComponent.transform.translation.z += zSpeed2 * _entity._world.tpf;
-				_entity.transformComponent.setUpdated();
-			}
-		}));
-		zombie2.addToWorld();
-
-		// TODO: Add collision
 
 		goo.renderer.domElement.id = 'goo';
 		document.body.appendChild(goo.renderer.domElement);
 		// Start the rendering loop!
 		goo.startGameLoop();
+		Game.paused = false;
 	}
 
 	init();

@@ -12,6 +12,24 @@ define([
 		_self.hammertime
 			.on('swipeleft', onSwipeLeft)
 			.on('swiperight', onSwipeRight);
+		window.document.body.onkeypress = function onKeyPressed(e) {
+			var keynum = false;
+
+			if(window.event){ // IE
+				keynum = e.keyCode;
+			}else {
+				if(e.which){ // Netscape/Firefox/Opera
+					keynum = e.which;
+				}
+			}
+
+			if (keynum !== false) {
+				// console.log('pressed: ', String.fromCharCode(keynum));
+				var eventName = 'keypress:' + String.fromCharCode(keynum);
+				// console.log('eventName', eventName);
+				Game.raiseEvent(eventName);
+			}
+		};
 	};
 
 	function onSwipeLeft (event) {

@@ -967,13 +967,13 @@
                 ],
                 "scale": [
                     8,
-                    300,
+                    150,
                     1
                 ],
                 "translation": [
                     0,
-                    3.4191814757647022e-15,
-                    -150
+                    0,
+                    -80
                 ]
             }
         },
@@ -1740,7 +1740,7 @@
         "ref": "textures/checker.texture",
         "repeat": [
             1,
-            100
+            30
         ],
         "url": "GOO_ASSET_LIBRARY/images/checker.png",
         "wrapU": "Repeat",
