@@ -3,17 +3,24 @@ define([
 	'goo/entities/components/ScriptComponent',
 	'goo/renderer/Camera',
 	'js/app/Game',
-	'js/load/BundleLoader'
+	'js/load/BundleLoader',
+	'js/component/CollisionComponent',
+	'js/game/EntityPool',
+	'js/game/Constants'
 ],
 function (
 	EntityUtils,
 	ScriptComponent,
 	Camera,
 	Game,
-	BundleLoader
+	BundleLoader,
+	CollisionComponent,
+	EntityPool,
+	Constants
 ) {
 	'use strict';
-	var INITIAL_Z = -100;
+	var INITIAL_Z = -50,
+		POOL_NAME = Constants.POOL_ZOMBIE;
 	
 	var _zombieEntity,
 		_walkState,
@@ -25,8 +32,7 @@ function (
 			2: -1,
 			3: 1,
 			4: 3
-		},
-		_zombiePool = [];
+		};
 
 	var Spawner = {
 		init: function init (_entity) {
@@ -50,10 +56,12 @@ function (
 					var pos = _entity.transformComponent.transform.translation;
 					if (pos.z > 0) {
 						_entity.removeFromWorld();
-						_zombiePool.push(_entity);
+						EntityPool.add(POOL_NAME, _entity);
 					}
 				}
 			}));
+			// Add a collision component, so the taxi can kill them!
+			zombie.setComponent(new CollisionComponent());
 			zombie.addToWorld();
 		},
 		startAutoSpawn: function startAutoSpawn () {
@@ -70,12 +78,8 @@ function (
 
 	function getNewZombieEntity() {
 		// Get from the pool if available
-		if (_zombiePool.length > 0) {
-			return _zombiePool.shift();
-		} else {
-			// Otherwise, create a new one by cloning
-			return EntityUtils.clone(Game.goo.world, _zombieEntity);
-		}
+		// Otherwise, create a new one by cloning
+		return EntityPool.get(POOL_NAME) || EntityUtils.clone(Game.goo.world, _zombieEntity);
 	}
 
 	// Returns a random integer between min and max
