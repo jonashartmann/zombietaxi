@@ -13,6 +13,8 @@ function (
 	BundleLoader
 ) {
 	'use strict';
+	var INITIAL_Z = -100;
+	
 	var _zombieEntity,
 		_walkState,
 		_runState,
@@ -23,7 +25,8 @@ function (
 			2: -1,
 			3: 1,
 			4: 3
-		};
+		},
+		_zombiePool = [];
 
 	var Spawner = {
 		init: function init (_entity) {
@@ -34,19 +37,20 @@ function (
 			_stateSpeed[_runState] = 10;
 		},
 		spawnZombie: function spawnZombie (state, pos) {
-			var zombie = EntityUtils.clone(Game.goo.world, _zombieEntity);
+			var zombie = getNewZombieEntity();
 			zombie.animationComponent.transitionTo(state);
 			zombie.transformComponent.transform.translation.x = pos;
+			zombie.transformComponent.transform.translation.z = INITIAL_Z;
 			zombie.setComponent(_zombieEntity.mesh.meshRendererComponent);
 			zombie.setComponent(new ScriptComponent({
 				run: function runZombieRun(_entity) {
 					_entity.transformComponent.transform.translation.z += _stateSpeed[state] * Game.goo.world.tpf;
 					_entity.transformComponent.setUpdated();
 
-					var bounds = _entity.meshRendererComponent.worldBound;
-					var result = Game.camera.cameraComponent.camera.contains(bounds);
-					if (result === Camera.Outside) {
-						console.log('Im outside!!!');
+					var pos = _entity.transformComponent.transform.translation;
+					if (pos.z > 0) {
+						_entity.removeFromWorld();
+						_zombiePool.push(_entity);
 					}
 				}
 			}));
@@ -60,9 +64,19 @@ function (
 			setInterval(function autoSpawn () {
 				if (Game.paused) { return; }
 				self.spawnZombie(states[getRandomInt(0,1)], _lanes[getRandomInt(1,4)]);
-			}, 3000);
+			}, 5000);
 		}
 	};
+
+	function getNewZombieEntity() {
+		// Get from the pool if available
+		if (_zombiePool.length > 0) {
+			return _zombiePool.shift();
+		} else {
+			// Otherwise, create a new one by cloning
+			return EntityUtils.clone(Game.goo.world, _zombieEntity);
+		}
+	}
 
 	// Returns a random integer between min and max
 	// Using Math.round() will give you a non-uniform distribution!
