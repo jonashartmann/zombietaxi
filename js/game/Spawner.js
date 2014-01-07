@@ -21,18 +21,12 @@ function (
 	'use strict';
 	var INITIAL_Z = -50,
 		POOL_NAME = Constants.POOL_ZOMBIE;
-	
+
 	var _zombieEntity,
 		_walkState,
 		_runState,
 		_zombies = [],
-		_stateSpeed = {},
-		_lanes = {
-			1: -3,
-			2: -1,
-			3: 1,
-			4: 3
-		};
+		_stateSpeed = {};
 
 	var Spawner = {
 		init: function init (_entity) {
@@ -41,10 +35,18 @@ function (
 			_runState = _entity.animationComponent.getStates()[3];
 			_stateSpeed[_walkState] = 5;
 			_stateSpeed[_runState] = 10;
+			this._lanes = [
+				-3,
+				-1,
+				1,
+				3
+			];
 		},
 		spawnZombie: function spawnZombie (state, pos) {
 			var zombie = getNewZombieEntity();
 			zombie.animationComponent.transitionTo(state);
+			// set a custom property with the current state so we can get it later
+			zombie.animationComponent.currentState = state;
 			zombie.transformComponent.transform.translation.x = pos;
 			zombie.transformComponent.transform.translation.z = INITIAL_Z;
 			zombie.setComponent(_zombieEntity.mesh.meshRendererComponent);
@@ -57,6 +59,7 @@ function (
 					if (pos.z > 0) {
 						_entity.removeFromWorld();
 						EntityPool.add(POOL_NAME, _entity);
+						Game.raiseEvent(Constants.EVENT_ESCAPED, _entity);
 					}
 				}
 			}));
@@ -67,12 +70,31 @@ function (
 		startAutoSpawn: function startAutoSpawn () {
 			var states = [_walkState, _runState];
 			var self = this;
+			var _timeout,
+				_interval = 5000,
+				_spawnAmount = 0;
 
-			self.spawnZombie(_runState, _lanes[1]);
-			setInterval(function autoSpawn () {
-				if (Game.paused) { return; }
-				self.spawnZombie(states[getRandomInt(0,1)], _lanes[getRandomInt(1,4)]);
-			}, 5000);
+			var autoSpawn = function autoSpawn () {
+				if (Game.paused) {
+					_timeout = setTimeout(autoSpawn, _interval);
+					return;
+				}
+				var freeLane = getRandomInt(0,3);
+				for (var i = 0; i < self._lanes.length; i++) {
+					if (i === freeLane) { continue; }
+					self.spawnZombie(states[getRandomInt(0,1)], self._lanes[i]);
+				}
+				_spawnAmount++;
+				if (_spawnAmount > 3) {
+					_interval -= 500;
+					if (_interval <= 2000) { _interval = 2000; }
+					_spawnAmount = 0;
+				}
+
+				_timeout = setTimeout(autoSpawn, _interval);
+			};
+
+			_timeout = setTimeout(autoSpawn, 1000);
 		}
 	};
 

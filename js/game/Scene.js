@@ -5,9 +5,19 @@ define([
 	'goo/entities/components/ScriptComponent',
 	'js/component/CollisionComponent',
 	'js/game/EntityPool',
-	'js/game/Constants'
+	'js/game/Constants',
+	'js/game/Score'
 ],
-function (Game, BundleLoader, Spawner, ScriptComponent, CollisionComponent, EntityPool, Constants) {
+function (
+	Game,
+	BundleLoader,
+	Spawner,
+	ScriptComponent,
+	CollisionComponent,
+	EntityPool,
+	Constants,
+	Score
+) {
 	'use strict';
 
 	var Scene = {
@@ -15,6 +25,7 @@ function (Game, BundleLoader, Spawner, ScriptComponent, CollisionComponent, Enti
 			setupTaxi();
 			setupRoad();
 			setupZombies();
+			Score.init();
 		}
 	};
 
@@ -48,8 +59,8 @@ function (Game, BundleLoader, Spawner, ScriptComponent, CollisionComponent, Enti
 				//console.log('Collision with %s at %d, %d ? ', other.name, otherPos.x, otherPos.z);
 				// Calculate collision with some space around the car, to be sure we catch it.
 				if ((otherPos.x === myPos.x) && (otherPos.z < myPos.z + 2) && (otherPos.z > myPos.z - 2)) {
-					console.log('Collision with ', other.name);
-					Game.raiseEvent('killed', other);
+					// console.log('Collision with ', other.name);
+					Game.raiseEvent(Constants.EVENT_KILLED, other);
 				}
 			}
 		}));
@@ -86,10 +97,10 @@ function (Game, BundleLoader, Spawner, ScriptComponent, CollisionComponent, Enti
 
 		Spawner.init(zombieRoot);
 		Spawner.startAutoSpawn();
-		
-		Game.register('killed', this, onZombieKilled);
+
+		Game.register(Constants.EVENT_KILLED, Scene, onZombieKilled);
 	}
-	
+
 	function onZombieKilled(zombie) {
 		console.log('Killed: ', zombie.name);
 		zombie.removeFromWorld();

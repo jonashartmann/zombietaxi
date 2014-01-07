@@ -51,3 +51,10 @@ div#shareButtons {
 	bottom: 10px;
 	z-index: 1;
 }
+
+.hud {
+	position: absolute;
+	left: 5%;
+	top: 10%;
+	color: yellow;
+}
