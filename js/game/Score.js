@@ -27,7 +27,7 @@ function (
 					run: function () {
 						// Create a hud element
 						if (!self.scoreEl) {
-							var hudEl = document.createElement('p');
+							var hudEl = document.createElement('div');
 							hudEl.className = 'hud';
 							hudEl.innerText = 'Score: ';
 							self.scoreEl = document.createElement('span');

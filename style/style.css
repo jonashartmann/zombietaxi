@@ -54,7 +54,9 @@ div#shareButtons {
 
 .hud {
 	position: absolute;
-	left: 5%;
-	top: 10%;
+	right: 70px;
+	top: 55px;
+	font-size: small;
+	z-index: 2000;
 	color: yellow;
 }
