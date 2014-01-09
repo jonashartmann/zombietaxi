@@ -12,6 +12,10 @@ function (
 ) {
 	'use strict';
 
+	var hudEl = document.createElement('div');
+	hudEl.className = 'hud';
+	document.body.appendChild(hudEl);
+
 	var Score = {
 		score: 0,
 		entity: null,
@@ -27,13 +31,10 @@ function (
 					run: function () {
 						// Create a hud element
 						if (!self.scoreEl) {
-							var hudEl = document.createElement('div');
-							hudEl.className = 'hud';
-							hudEl.innerText = 'Score: ';
 							self.scoreEl = document.createElement('span');
+							hudEl.innerText = 'Score: ';
 							self.scoreEl.innerText = 0;
 							hudEl.appendChild(self.scoreEl);
-							document.body.appendChild(hudEl);
 						}
 					}
 				}));
