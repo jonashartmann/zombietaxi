@@ -12,10 +12,6 @@ function (
 ) {
 	'use strict';
 
-	var hudEl = document.createElement('div');
-	hudEl.className = 'hud';
-	document.body.appendChild(hudEl);
-
 	var Score = {
 		score: 0,
 		entity: null,
@@ -31,10 +27,13 @@ function (
 					run: function () {
 						// Create a hud element
 						if (!self.scoreEl) {
+							var hudEl = document.createElement('div');
+							hudEl.className = 'hud';
 							self.scoreEl = document.createElement('span');
-							hudEl.innerText = 'Score: ';
-							self.scoreEl.innerText = 0;
+							hudEl.innerHTML = 'Score: ';
+							self.scoreEl.innerHTML = 0;
 							hudEl.appendChild(self.scoreEl);
+							document.body.appendChild(hudEl);
 						}
 					}
 				}));
@@ -54,7 +53,7 @@ function (
 					}
 					self.score += 100 * self.multiplier;
 					self.escapedAmount = 0;
-					self.scoreEl.innerText = self.score;
+					self.scoreEl.innerHTML = self.score;
 					// console.log('Score: %d', self.score);
 				}
 			);
@@ -62,7 +61,7 @@ function (
 				function onEscapedZombie (_zombie) {
 					self.escapedAmount++;
 					self.score += 10;
-					self.scoreEl.innerText = self.score;
+					self.scoreEl.innerHTML = self.score;
 					// console.log('Escaped',self.escapedAmount);
 				}
 			);
