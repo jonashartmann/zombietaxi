@@ -1,7 +1,7 @@
 Zombie Taxi
 ==========
 
-# Drive yourself crazy while escaping the zombie invasion. How long can you stand?
+*Drive yourself crazy while escaping the zombie invasion. How long can you stand?*
 
 Mobile game made with the Goo Engine and Goo Creator.
 
