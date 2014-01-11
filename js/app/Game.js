@@ -8,6 +8,12 @@ define([
         _self.goo = goo;
         _self.camera = camera;
         _self.paused = true;
+        _self.bgMusic = new window.Howl({
+            urls: ['../../res/bgmusic.wav'],
+            autoplay: true,
+  			loop: true,
+  			volume: 0.5
+        });
     };
 
     _self._listeners = {};
